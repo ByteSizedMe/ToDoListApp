@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:id="@+id/cardView">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/taskCompleted"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="4dp"
+            android:clickable="true"
+            android:contentDescription="@string/completed_icon"
+            android:focusable="true"
+            android:src="@drawable/task_completed"
+            app:layout_constraintBottom_toTopOf="@id/deleteIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/deleteIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:clickable="true"
+            android:contentDescription="@string/delete_icon"
+            android:focusable="true"
+            android:src="@drawable/delete_task"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/taskCompleted" />
+
+        <TextView
+            android:id="@+id/task"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/task_name"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/taskCompleted"
+            android:paddingTop="4dp"
+            android:paddingBottom="2dp"
+            tools:text="Buy groceries" />
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/task_description"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/task"
+            app:layout_constraintStart_toStartOf="@id/task"
+            app:layout_constraintEnd_toStartOf="@id/taskCompleted"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            tools:text="Milk, bread, eggs" />
+
+        <TextView android:id="@+id/deadline"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_deadline"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@+id/description"
+            app:layout_constraintStart_toStartOf="@id/description"
+            app:layout_constraintEnd_toStartOf="@id/taskCompleted"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
