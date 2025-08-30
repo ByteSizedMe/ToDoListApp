@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: Adapter
     private var currentDialog: AlertDialog? = null
 
+    // Get DataViewModel with injected DAO using DataViewModelFactory
     private val viewModel: DataViewModel by viewModels {
         DataViewModelFactory(AppDatabase.getDatabase(this).dao)
     }
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Handle system insets
+        // Handle system insets (status/navigation bars)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -53,37 +54,41 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        // Delete callback
+        // Handle task deletion
         adapter.onDeleteClick = { data -> viewModel.onEvent(DataEvent.deleteData(data)) }
 
+        // Handle task completion toggle
         adapter.onCompleteClick = { data ->
-            if(data.isCompleted){
+            if (data.isCompleted) {
                 viewModel.onEvent(DataEvent.taskNotCompleted(data))
-            }
-            else{
+            } else {
                 viewModel.onEvent(DataEvent.taskCompleted(data))
             }
         }
 
-        // Toolbar
+        // Setup custom Toolbar
         val toolbar: Toolbar = findViewById(R.id.toolbar_include)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        // Collect state and events
+        // Collect state and events from ViewModel
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Collect UI state updates
                 launch {
                     viewModel.state.collect { state ->
-                        adapter.submitList(state.tasks)
-                        if (state.isAdding) showAddTaskDialog()
+                        adapter.submitList(state.tasks) // Update RecyclerView
+                        if (state.isAdding) showAddTaskDialog() // Show dialog if needed
                     }
                 }
+                // Collect one-time UI events (toast, dismiss, etc.)
                 launch {
                     viewModel.uiEvent.collect { event ->
                         when (event) {
-                            is UiEvent.ShowToast -> Toast.makeText(this@MainActivity, event.message, Toast.LENGTH_SHORT).show()
-                            is UiEvent.DismissDialog -> currentDialog?.dismiss()
+                            is UiEvent.ShowToast ->
+                                Toast.makeText(this@MainActivity, event.message, Toast.LENGTH_SHORT).show()
+                            is UiEvent.DismissDialog ->
+                                currentDialog?.dismiss()
                         }
                     }
                 }
@@ -91,11 +96,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Inflate menu options (Add, Sort)
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
         return true
     }
 
+    // Helper to map menu IDs → custom MenuAction type
     private fun menuActionFromId(id: Int): MenuAction {
         return when (id) {
             R.id.addTask -> MenuAction.AddTask
@@ -106,6 +113,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Handle toolbar menu item clicks
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (val action = menuActionFromId(item.itemId)) {
             MenuAction.AddTask -> {
@@ -128,8 +136,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Show "Add Task" dialog box
     private fun showAddTaskDialog() {
-        if (currentDialog?.isShowing == true) return // avoid multiple dialogs
+        if (currentDialog?.isShowing == true) return // Prevent duplicate dialogs
 
         val dialogView = layoutInflater.inflate(R.layout.dialog_box, null)
         val dialog = AlertDialog.Builder(this)
@@ -142,11 +151,11 @@ class MainActivity : AppCompatActivity() {
         val descInput = dialogView.findViewById<EditText>(R.id.newDesc)
         val deadlineInput = dialogView.findViewById<EditText>(R.id.deadlineInput)
 
-        // Prefill
+        // Prefill existing state values
         taskInput.setText(viewModel.state.value.currentTask)
         descInput.setText(viewModel.state.value.currentDescription)
 
-        // Handle DatePicker
+        // Setup DatePicker for deadline input
         deadlineInput.setOnClickListener {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
@@ -157,35 +166,39 @@ class MainActivity : AppCompatActivity() {
                 val selectedCal = Calendar.getInstance()
                 selectedCal.set(y, m, d)
 
-                // Format: dd/MM/yyyy (you can change it to ISO or millis if needed)
+                // Format date to dd/MM/yyyy
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val dateString = sdf.format(selectedCal.time)
 
                 deadlineInput.setText(dateString)
 
-                // Save into ViewModel state as millis
+                // Save into ViewModel state (as millis)
                 viewModel.onEvent(DataEvent.setDeadline(selectedCal.timeInMillis))
             }, year, month, day)
 
+            // Block past dates
             datePicker.datePicker.minDate = calendar.timeInMillis
 
             datePicker.show()
         }
 
+        // Setup Save + Cancel buttons
         val saveBtn = dialogView.findViewById<Button>(R.id.saveButton)
         val cancelBtn = dialogView.findViewById<Button>(R.id.cancelButton)
 
         saveBtn.setOnClickListener {
+            // Push user inputs into ViewModel
             viewModel.onEvent(DataEvent.setTask(taskInput.text.toString()))
             viewModel.onEvent(DataEvent.setDescription(descInput.text.toString()))
-            viewModel.onEvent(DataEvent.saveData)
+            viewModel.onEvent(DataEvent.saveData) // Save task
         }
 
         cancelBtn.setOnClickListener {
-            viewModel.onEvent(DataEvent.hideDialog)
+            viewModel.onEvent(DataEvent.hideDialog) // Close without saving
             dialog.dismiss()
         }
 
+        // Show dialog with transparent background
         dialog.show()
         dialog.window?.setLayout(
             WindowManager.LayoutParams.WRAP_CONTENT,
