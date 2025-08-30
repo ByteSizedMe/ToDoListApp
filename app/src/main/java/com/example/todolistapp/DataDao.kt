@@ -25,4 +25,10 @@ interface DataDao {
 
     @Query("SELECT * FROM Data ORDER BY deadline ASC")
     fun sortByDeadline(): Flow<List<Data>>
+
+    @Query("UPDATE Data SET isCompleted = 1 WHERE id = :itemId")
+    suspend fun updateCompleted(itemId : Int)
+
+    @Query("UPDATE Data SET isCompleted = 0 WHERE id = :itemId")
+    suspend fun updateNotCompleted(itemId : Int)
 }

@@ -10,5 +10,6 @@ data class Data(
     val taskName : String,
     val taskDescription : String,
     val createdAt: Long = System.currentTimeMillis(),
-    val deadline : Long?
+    val deadline : Long?,
+    val isCompleted : Boolean = false
 )

@@ -98,6 +98,17 @@ class DataViewModel(private val dao : DataDao): ViewModel() {
             is DataEvent.setDeadline -> {
                 _state.value = _state.value.copy(currentDeadLine = event.deadline)
             }
+
+            is DataEvent.taskCompleted -> {
+                viewModelScope.launch {
+                    dao.updateCompleted(event.data.id)
+                }
+            }
+            is DataEvent.taskNotCompleted -> {
+                viewModelScope.launch {
+                    dao.updateNotCompleted(event.data.id)
+                }
+            }
         }
     }
 }

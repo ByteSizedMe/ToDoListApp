@@ -20,6 +20,7 @@ class Adapter(private val context: Context) :
 
     // delete callback
     var onDeleteClick: ((Data) -> Unit)? = null
+    var onCompleteClick: ((Data) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExampleViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_view, parent, false)
@@ -32,13 +33,15 @@ class Adapter(private val context: Context) :
         holder.description.text = item.taskDescription
         holder.deadline.text = formatDate(item.deadline)
 
+        if(item.isCompleted){
+            holder.cardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.green))
+        }
+        else{
+            holder.cardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.white))
+        }
+
         holder.completed.setOnClickListener {
-            val currentColor = holder.cardView.cardBackgroundColor.defaultColor
-            if (currentColor == ContextCompat.getColor(context, R.color.green)) {
-                holder.cardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.white))
-            } else {
-                holder.cardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.green))
-            }
+            onCompleteClick?.invoke(item)
         }
 
         holder.delete.setOnClickListener {

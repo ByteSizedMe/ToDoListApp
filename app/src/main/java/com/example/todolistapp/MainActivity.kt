@@ -56,6 +56,15 @@ class MainActivity : AppCompatActivity() {
         // Delete callback
         adapter.onDeleteClick = { data -> viewModel.onEvent(DataEvent.deleteData(data)) }
 
+        adapter.onCompleteClick = { data ->
+            if(data.isCompleted){
+                viewModel.onEvent(DataEvent.taskNotCompleted(data))
+            }
+            else{
+                viewModel.onEvent(DataEvent.taskCompleted(data))
+            }
+        }
+
         // Toolbar
         val toolbar: Toolbar = findViewById(R.id.toolbar_include)
         setSupportActionBar(toolbar)
@@ -127,6 +136,7 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
         currentDialog = dialog
+        dialog.setCanceledOnTouchOutside(false)
 
         val taskInput = dialogView.findViewById<EditText>(R.id.newTask)
         val descInput = dialogView.findViewById<EditText>(R.id.newDesc)

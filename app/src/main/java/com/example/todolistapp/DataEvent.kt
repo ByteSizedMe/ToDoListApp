@@ -9,4 +9,6 @@ sealed interface DataEvent {
     object saveData : DataEvent
     data class deleteData(val data : Data) : DataEvent
     data class sortBy(val sortType : SortBy): DataEvent
+    data class taskCompleted(val data : Data): DataEvent
+    data class taskNotCompleted(val data : Data): DataEvent
 }
